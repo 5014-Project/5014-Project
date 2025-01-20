@@ -1,0 +1,30 @@
+{
+    "trading_platform": {
+        "max_trade_amount": 100,
+        "min_trade_amount": 1,
+        "trade_interval": "15m",
+        "trade_fee_percentage": 0.02,
+        "currency": "CAD",
+        "transaction_timeout": 600,
+        "dynamic_pricing": true,
+        "pricing_model": "auction",
+        "auction": {
+            "initial_price": 0.1,
+            "price_adjustment_rate": 0.01,
+            "max_price": 1.0,
+            "min_price": 0.05
+        }
+    },
+    "smart_contracts": {
+        "enabled": true,
+        "contract_template": "energy_trade_template",
+        "gas_fee": 0.001,
+        "blockchain_platform": "Ethereum",
+        "contract_timeout": 3600
+    },
+    "transaction_history": {
+        "enable_logging": true,
+        "log_file": "transactions.log",
+        "max_log_size_mb": 50
+    }
+}

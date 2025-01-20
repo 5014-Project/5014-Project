@@ -1,0 +1,49 @@
+{
+    "system_settings": {
+        "system_name": "Smart Home Energy Management",
+        "location": "Ontario, Canada",
+        "time_zone": "America/Toronto",
+        "simulation_mode": true,
+        "real_time_monitoring": true,
+        "communication_protocol": "MQTT",
+        "data_logging": {
+            "enable_logging": true,
+            "log_file": "system_data.log",
+            "max_log_size_mb": 100
+        }
+    },
+    "energy_management": {
+        "energy_source": "solar",
+        "battery_storage": {
+            "enabled": true,
+            "capacity_kWh": 10,
+            "charging_rate": 2,
+            "discharging_rate": 2
+        },
+        "peak_demand_threshold": 80,
+        "demand_response": {
+            "enabled": true,
+            "response_time": 15,
+            "penalty": 0.05
+        }
+    },
+    "agent_configuration": {
+        "prediction_agent": {
+            "model_file": "lstm_model.pkl",
+            "prediction_horizon": 24
+        },
+        "behavioral_agent": {
+            "data_file": "appliance_data.csv",
+            "segmentation_method": "kmeans",
+            "num_clusters": 3
+        },
+        "negotiation_agent": {
+            "auction_model_file": "auction_model.pkl",
+            "max_bids": 5
+        }
+    },
+    "testing": {
+        "enable_unit_tests": true,
+        "test_log_file": "test_results.log"
+    }
+}
