@@ -10,12 +10,9 @@ import numpy as np
 import tensorflow as tf # to Import TensorFlow, you may need to run -----------> pip install tensorflow
 import random
 
-# Get the project directory dynamically based on the script location
-project_dir = os.path.dirname(os.path.abspath(__file__))
-
 # Define paths relative to the project directory
-model_path = os.path.join(project_dir, "energy_lstm.keras")
-data_path = os.path.join(project_dir, "energy_test_set.npz")
+model_path = os.path.join("models", "energy_lstm.keras")
+data_path = os.path.join("test_agents", "energy_test_set.npz")
 
 # Load the trained LSTM model
 model = tf.keras.models.load_model(model_path)

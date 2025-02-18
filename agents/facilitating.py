@@ -102,7 +102,7 @@ class FacilitatingAgent(Agent):
                             # Set resolved status of dependencies to false as 
                             # message was corrupted and a new one is needed
                             for dependency in self.dependencies[agent]:
-                                self.resolved[dependency]["Status"] = False
+                                self.resolved[dependency]["Status"] = False #True
 
                     # Print dependencies that have not yet been fulfilled (this way we know if a specific agent is blocking the system)
                     else:
