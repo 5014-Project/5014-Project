@@ -14,7 +14,7 @@ class DemandResponseAgent(Agent):
                     data = json.loads(msg.body).get("grid")
                     print(f"[DemandResponseAgent] Received data: {data}")
                     if data.get("grid_demand") > 50:
-                        curtailment = data["household_power"] * 0.2
+                        curtailment = data["household_power"] * 0.25
                     else:
                         curtailment = 0
                     response = Message(to="facilitating@localhost")
