@@ -1,0 +1,24 @@
+Step 1: Set Up Your Development Environment
+
+You need VS Code with the following installed:
+
+✅ Node.js & npm (for Hardhat & Web3.js)
+✅ Python 3 & Web3.py (for Python interaction)
+✅ MetaMask Wallet (for testing transactions)
+✅ Hardhat (for local Ethereum blockchain testing)
+
+
+Node.js & npm 
+    https://nodejs.org/en/download/package-manager/all
+
+    Windows
+
+    Download the Windows Installer directly from the nodejs.org web site.
+    Alternatives
+
+    Using Winget:
+
+    winget install OpenJS.NodeJS
+    # or for LTS
+    winget install OpenJS.NodeJS.LTS
+
