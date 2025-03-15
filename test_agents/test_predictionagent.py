@@ -14,8 +14,8 @@ import random
 project_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Define paths relative to the project directory
-model_path = os.path.join(project_dir, "energy_lstm.keras")
-data_path = os.path.join(project_dir, "energy_test_set.npz")
+model_path = os.path.join(project_dir,"models","energy_lstm.keras")
+data_path = os.path.join(project_dir,"models","energy_test_set.npz")
 
 # Load the trained LSTM model
 model = tf.keras.models.load_model(model_path)
