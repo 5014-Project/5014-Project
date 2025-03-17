@@ -8,9 +8,8 @@ import numpy as np
 project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Define paths relative to the project directory
-model_filename = os.path.join(project_dir, "test_agents","models", "lightgbm_ranker_model.pkl")
-preprocess_test_data_filename = os.path.join(project_dir, "test_agents","models", "preprocessed_smart_home_data.csv")
-test_data_filename = os.path.join(project_dir, "test_agents","models", "smart_home_energy_usage_dataset.csv")
+model_filename = os.path.join(project_dir, "test_agents", "models", "lightgbm_ranker_model.pkl")
+preprocess_test_data_filename = os.path.join(project_dir, "test_agents", "models", "preprocessed_smart_home_data.csv")
 
 # Load the trained LightGBM model
 try:
@@ -22,37 +21,22 @@ except Exception as e:
 
 # Load the preprocessed test dataset
 try:
-    test_data = pd.read_csv(test_data_filename)
-    print(f"✅ Test data loaded successfully from {test_data_filename}")
+    test_data = pd.read_csv(preprocess_test_data_filename)
+    print(f"✅ Preprocessed test data loaded successfully from {preprocess_test_data_filename}")
 except Exception as e:
-    print(f"❌ Error loading test data: {e}")
+    print(f"❌ Error loading preprocessed test data: {e}")
     exit(1)
 
-# Generate 'year' and 'hour' from 'timestamp'
-try:
-    test_data['timestamp'] = pd.to_datetime(test_data['timestamp'], errors='coerce')
-    test_data['year'] = test_data['timestamp'].dt.year
-    test_data['hour'] = test_data['timestamp'].dt.hour
-except Exception as e:
-    print(f"❌ Error processing timestamp: {e}")
-    exit(1)
-
-# Generate the same "group_id" used in training
-test_data["group_id"] = test_data["year"].astype(str) + "_" + test_data["hour"].astype(str)
-
-# Count the number of samples per group (same as training logic)
-group_test_fixed = test_data.groupby("group_id").size().tolist()
-
-# Select only required features for the model
-features = [
-    "energy_consumption_kWh",
-    "temperature_setting_C",
-    "usage_duration_minutes",
-    "hour",
-    "holiday"
+# Drop unneeded features to match the model's expected input
+columns_to_drop = [
+    "timestamp", "occupancy_status", "hour", "date", "year",
+    "is_weekday", "season_Autumn", "season_Spring", "season_Summer",
+    "season_Winter", "appliance_encoded", "priority"
 ]
+test_data.drop(columns=columns_to_drop, inplace=True, errors='ignore')
 
-X_test = test_data[features]
+# Extract the required features for prediction
+X_test = test_data.copy()
 
 # Predict priority scores using the loaded model
 try:
@@ -62,8 +46,7 @@ except Exception as e:
     exit(1)
 
 # Add predictions to the test DataFrame
-X_test_df = pd.DataFrame(X_test)
-X_test_df["predicted_priority"] = y_pred
+X_test["predicted_priority"] = y_pred
 
 # Normalize predictions between 0 and 1
 y_pred_norm = (y_pred - y_pred.min()) / (y_pred.max() - y_pred.min())
@@ -71,27 +54,16 @@ y_pred_norm = (y_pred - y_pred.min()) / (y_pred.max() - y_pred.min())
 # Check if predicted values have sufficient variance
 if np.unique(y_pred_norm).size > 6:
     ranked_preds = pd.Series(y_pred_norm).rank(method="first")
-    X_test_df["predicted_priority"] = pd.qcut(ranked_preds, 6, labels=[1, 2, 3, 4, 5, 6])
+    X_test["predicted_priority"] = pd.qcut(ranked_preds, 6, labels=[1, 2, 3, 4, 5, 6])
 else:
-    X_test_df["predicted_priority"] = pd.cut(y_pred_norm, bins=6, labels=[1, 2, 3, 4, 5, 6])
+    X_test["predicted_priority"] = pd.cut(y_pred_norm, bins=6, labels=[1, 2, 3, 4, 5, 6])
 
-# Sort the results by predicted priority (higher first)
-X_test_sorted = X_test_df.sort_values(by="predicted_priority", ascending=False)
+# Group by home_id and export data for each home (up to h10)
+for home_id in range(1, 11):
+    home_data = X_test[X_test['home_id'] == home_id]
+    if not home_data.empty:
+        output_path = os.path.join(project_dir, "test_agents", "models", f"house_{home_id}.csv")
+        home_data.to_csv(output_path, index=False)
+        print(f"✅ Data for house {home_id} saved to '{output_path}'")
 
-# Display results
-print(X_test_sorted.head(10))
-print("\nLast 10 rows of predictions:")
-print(X_test_sorted.tail(10))
-
-middle_index = len(X_test_sorted) // 2
-middle_rows = X_test_sorted.iloc[middle_index-5:middle_index+5]
-print("\nMiddle 10 rows of predictions:")
-print(middle_rows)
-
-# Save predictions
-output_path = os.path.join(project_dir, "models", "predicted_results.csv")
-try:
-    X_test_sorted.to_csv(output_path, index=False)
-    print(f"\n✅ Predicted results saved to '{output_path}'")
-except Exception as e:
-    print(f"❌ Error saving predictions: {e}")
+print("✅ All house data successfully processed and exported.")

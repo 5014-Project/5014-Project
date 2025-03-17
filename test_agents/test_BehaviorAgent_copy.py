@@ -72,7 +72,7 @@ print("\nMiddle 10 rows of predictions:")
 print(middle_rows)
 
 # Save predictions
-output_path = os.path.join(project_dir, "models", "predicted_results.csv")
+output_path = os.path.join(project_dir, "test_agents","models", "predicted_results.csv")
 try:
     X_test_sorted.to_csv(output_path, index=False)
     print(f"\n✅ Predicted results saved to '{output_path}'")
