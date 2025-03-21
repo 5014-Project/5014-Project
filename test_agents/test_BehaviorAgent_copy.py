@@ -31,7 +31,7 @@ except Exception as e:
 columns_to_drop = [
     "timestamp", "home_id", "occupancy_status", "hour", "date", "year", 
     "is_weekday", "season_Autumn", "season_Spring", "season_Summer", 
-    "season_Winter", "appliance_encoded", "priority"
+    "season_Winter", "holiday", "priority"
 ]
 test_data.drop(columns=columns_to_drop, inplace=True, errors='ignore')
 
