@@ -30,4 +30,4 @@ class BehavioralSegmentationAgent(Agent):
     async def setup(self):
         print("[BehavioralSegmentationAgent] Started")
         self.add_behaviour(self.SegmentationBehaviour())
-        self.web.start(hostname="localhost", port="9093")
+        self.web.start(hostname="localhost", port="9097")

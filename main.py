@@ -83,7 +83,7 @@ def deploy_smart_contract():
     try:
         print(f"   Executing via Start-Process with Script Block...")
         deployment_launcher_process = subprocess.Popen(command_list)
-        print("   Waiting for deployment & .env update (approx 35s)...")
+        print("   Waiting for deployment & .env update (approx 25s)...")
         time.sleep(25)
         exit_code = deployment_launcher_process.poll() # Check if launcher itself exited
         if exit_code is not None: print(f"   Warning: Deployment launcher process exited early (Code: {exit_code}).")
