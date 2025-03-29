@@ -12,10 +12,24 @@ from agents.gui import GUIAgent
 from agents.grid import Grid
 from agents.house import House
 
+#before running this script, make sure to run the following commands in a terminal:
+# pip install spade
+# pip install streamlit
+# pip install pandas
+# pip install numpy
+# pip install lightgbm
+# pip install joblib
+# pip install matplotlib
+# pip install seaborn
+# pip install scikit-learn
+# npm install --global ganache
+# npm install --global truffle
+
 # --- Configuration ---
 PROJECT_ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 BLOCKCHAIN_DIR = os.path.join(PROJECT_ROOT_DIR, "blockchain")
-
+print(f"   Project root directory: {PROJECT_ROOT_DIR}")
+print(f"   Blockchain directory: {BLOCKCHAIN_DIR}")
 # --- Process Launch Functions ---
 
 def start_spade():
@@ -40,19 +54,37 @@ def start_streamlit():
     except Exception as e: print(f"❌ Error starting Streamlit inline: {e}"); return None
 
 def start_ganache():
-    """Starts Ganache (v7+) in a new PowerShell window."""
-    print("🟡 Starting Ganache in new PowerShell window...")
+    """Starts Ganache (v7+) in a new PowerShell window, bypassing execution policy AND KEEPS IT OPEN."""
+    print("🟡 Starting Ganache in new PowerShell window (bypassing policy, will stay open)...")
     try:
-        ganache_args = "'ganache --networkId 5777 --hardfork shanghai'"
-        command_list = ["powershell", "-Command", "Start-Process", "powershell", "-ArgumentList", ganache_args]
-        ganache_launcher_process = subprocess.Popen(command_list)
+        # The actual command sequence we want the *new* PowerShell instance to run
+        ganache_cmd_line = "ganache --networkId 5777 --hardfork shanghai"
+        
+        # Construct the argument list for Start-Process
+        # The command must be wrapped in quotes to ensure PowerShell interprets it correctly
+        argument_string = f"-ExecutionPolicy Bypass -NoExit -Command \"{ganache_cmd_line}\""
+
+        # Launch a new PowerShell window with the command
+        ganache_launcher_process = subprocess.Popen([
+            "powershell", "-Command", f"Start-Process powershell -ArgumentList '{argument_string}' -NoNewWindow"
+        ])
+
         print("   Waiting for Ganache to initialize...")
         time.sleep(7)
+
+        exit_code = ganache_launcher_process.poll()
+        if exit_code is not None:
+            print(f"   Warning: Ganache launcher process exited early (Code: {exit_code}). Check the PowerShell window.")
+
         print("✅ Ganache should be running in a separate window.")
         return ganache_launcher_process
-    except FileNotFoundError: print(f"❌ Error: 'powershell' not found."); return None
-    except Exception as e: print(f"❌ Error starting Ganache via Start-Process: {e}"); return None
-
+    except FileNotFoundError:
+        print(f"❌ Error: 'powershell' command not found.")
+        return None
+    except Exception as e:
+        print(f"❌ Error starting Ganache via Start-Process: {e}")
+        return None
+           
 def deploy_smart_contract():
     """Deploys the smart contract using Truffle in a new PowerShell window (using Script Block)."""
     print("🟡 Deploying contract in new PowerShell window...")
