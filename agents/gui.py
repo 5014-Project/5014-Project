@@ -13,7 +13,7 @@ class GUIAgent(Agent):
         self.initialize_database()
 
     def initialize_database(self):
-        """Creates tables for storing energy data if they do not exist."""
+        """Creates tables for storing energy and balance data if they do not exist."""
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
 
@@ -27,6 +27,13 @@ class GUIAgent(Agent):
             """,
             "energy_consumption": """
                 CREATE TABLE IF NOT EXISTS energy_consumption (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    value REAL
+                )
+            """,
+            "balance": """
+                CREATE TABLE IF NOT EXISTS balance (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                     value REAL
@@ -51,6 +58,7 @@ class GUIAgent(Agent):
         cursor.execute(query, (value,))
         conn.commit()
         conn.close()
+        print(f"[GUI] Inserting {value} into {table} table")
 
     class guiBehaviour(CyclicBehaviour):
         async def run(self):
@@ -61,13 +69,17 @@ class GUIAgent(Agent):
                 try:
                     data = json.loads(msg.body)
                     if data["house"] is None:
-                        print(f"[GUI] Missing data: {data}")
+                        print(f"[GUI] Missing house data: {data["house"]}")
                     else:
-                        print(f"[GUI] Received data: {data}")
-
                         # Use self.agent to store data at the agent level
                         self.agent.store_data("energy_production", data["house"].get("current_production"))
                         self.agent.store_data("energy_consumption", data["house"].get("current_demand"))
+                    
+                    if data["negotiation"] is None:
+                        print(f"[GUI] Missing negotiation data: {data["negotiation"]}")
+                    else:
+                        print(data["negotiation"].get("balance"))
+                        self.agent.store_data("balance", data["negotiation"].get("balance"))
 
                 except Exception as e:
                     print(f"[GUI] Error: {e}")

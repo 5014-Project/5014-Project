@@ -172,6 +172,23 @@ class NegotiationAgent(Agent):
                 return 3
                     
 
+        async def get_wallet_balance(self):
+            """Retrieve the balance of the agent's wallet."""
+            balance_wei = self.web3.eth.get_balance(self.account)
+            balance_eth = self.web3.from_wei(balance_wei, 'ether')
+            return balance_eth
+        
+        async def send_wallet_balance(self):
+            # Send the wallet balance to facilitating agent
+            balance = await self.get_wallet_balance()
+            response = Message(to="facilitating@localhost")
+            response.body = json.dumps({
+                "balance": float(balance)
+            })
+
+            await self.send(response)
+            print(f"[NegotiationAgent] Sent balance to FacilitatingAgent: {response.body}")
+                
 
         async def run(self):
             print("[NegotiationAgent] Waiting for surplus energy data...")
@@ -233,6 +250,8 @@ class NegotiationAgent(Agent):
                             await self.reveal()
 
                             self.trading = False
+                            await self.send_wallet_balance()
+
                         elif not self.trading:
 
                             self.trading = True
@@ -266,6 +285,12 @@ class NegotiationAgent(Agent):
                             await self.close()
 
                             self.trading = False
+                            await self.send_wallet_balance()
+
+                        else:
+                            print("[NegotiationAgent] Unexpected behaviour in trading logic")
+                        
+                        
                     
                 except Exception as e:
                     print(f"[NegotiationAgent] Error: {e}")

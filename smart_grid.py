@@ -86,7 +86,7 @@ def run_auction_round(bidders, auction_contract, auctioneer, web3, auction_holde
     print(f"Bidding phase starts at block time: {datetime.fromtimestamp(bidding_start)}")
 
     # Step 3: Bidders place sealed bids
-    bid_values = [web3.to_wei(0.1, "ether"), web3.to_wei(0.2, "ether"), web3.to_wei(0.15, "ether"), web3.to_wei(0.25, "ether")]
+    bid_values = [web3.to_wei(0.01, "ether"), web3.to_wei(0.02, "ether"), web3.to_wei(0.015, "ether"), web3.to_wei(0.025, "ether")]
     nonces = ["house1", "house2", "house3", "house4"]
 
     sealed_bids = [create_sealed_bid(bid_values[i], nonces[i]) for i in range(len(bid_values))]

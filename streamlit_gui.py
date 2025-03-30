@@ -2,12 +2,14 @@ import streamlit as st
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
+import time
 import pytz  # Import pytz for timezone handling
 
+REFRESH_INTERVAL_SECONDS = 10
 DB_NAME = "energy_data.db"
 TARGET_TIMEZONE = 'America/New_York'  # EST/EDT
 
-@st.cache_data
+
 def fetch_data(table_name):
     """Fetches data from the selected table."""
     try:
@@ -46,8 +48,33 @@ def plot_data(df, table_name, time_col, value_col, target_timezone):
         st.error(f"Error plotting data from {table_name}: {e}")
         return None
 
+
+def get_latest_balance():
+    """Fetches the most recent balance value from the 'balance' table."""
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        query = "SELECT value FROM balance ORDER BY timestamp DESC LIMIT 1"
+        df = pd.read_sql_query(query, conn)
+        conn.close()
+
+        if not df.empty:
+            return df['value'].iloc[0]
+        else:
+            return None
+
+    except Exception as e:
+        st.error(f"Error fetching latest balance: {e}")
+        return None
+
 # Streamlit UI
 st.title("Energy Monitoring Dashboard")
+
+# Display the latest balance at the top
+latest_balance = get_latest_balance()
+if latest_balance is not None:
+    st.markdown(f"**Latest Balance: {latest_balance:.2f} ETH**", unsafe_allow_html=True)  # Format as currency
+else:
+    st.warning("Could not retrieve latest balance.")
 
 # Define table names and corresponding column names
 tables_config = {
@@ -64,3 +91,7 @@ for table_name, config in tables_config.items():
             st.pyplot(fig)  # Display the Matplotlib plot in Streamlit
     else:
         st.warning(f"Could not display graph for {table_name}.")
+
+# --- Auto-refresh ---
+time.sleep(REFRESH_INTERVAL_SECONDS)
+st.rerun()
