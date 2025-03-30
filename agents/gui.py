@@ -18,8 +18,20 @@ class GUIAgent(Agent):
         cursor = conn.cursor()
 
         tables = {
-            "energy_production": "CREATE TABLE IF NOT EXISTS energy_production (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, value REAL)",
-            "energy_consumption": "CREATE TABLE IF NOT EXISTS energy_consumption (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp REAL, value REAL)"
+            "energy_production": """
+                CREATE TABLE IF NOT EXISTS energy_production (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    value REAL
+                )
+            """,
+            "energy_consumption": """
+                CREATE TABLE IF NOT EXISTS energy_consumption (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    value REAL
+                )
+            """
         }
 
         for query in tables.values():
@@ -29,11 +41,14 @@ class GUIAgent(Agent):
         conn.close()
 
     def store_data(self, table, value):
+        if value is None:
+            print("[GUI] None value in store_data. Returning early.")
+            return
         """Inserts data into the corresponding table."""
-        timestamp = time.time()
         conn = sqlite3.connect(self.db_name)
         cursor = conn.cursor()
-        cursor.execute(f"INSERT INTO {table} (timestamp, value) VALUES (?, ?)", (timestamp, value))
+        query = f"INSERT INTO {table} (value) VALUES (?)"
+        cursor.execute(query, (value,))
         conn.commit()
         conn.close()
 
@@ -51,8 +66,8 @@ class GUIAgent(Agent):
                         print(f"[GUI] Received data: {data}")
 
                         # Use self.agent to store data at the agent level
-                        self.agent.store_data("energy_production", data["house"].get("energy_production", 0))
-                        self.agent.store_data("energy_consumption", data["house"].get("energy_consumption", 0))
+                        self.agent.store_data("energy_production", data["house"].get("current_production"))
+                        self.agent.store_data("energy_consumption", data["house"].get("current_demand"))
 
                 except Exception as e:
                     print(f"[GUI] Error: {e}")
