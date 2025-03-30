@@ -12,6 +12,11 @@ import datetime
 class NegotiationAgent(Agent):
     class TradingBehaviour(CyclicBehaviour):
         async def on_start(self):
+
+            # Trading variable to track if the agent is currently trading
+            # (This prevents overloading our test blockchain and double-selling)
+            self.trading = False
+
             # Connect to local blockchain (Ganache)
             self.web3 = Web3(Web3.HTTPProvider("http://127.0.0.1:8545"))
             assert self.web3.is_connected(), "Failed to connect to the blockchain"
@@ -190,12 +195,13 @@ class NegotiationAgent(Agent):
                         print(f"[NegotiationAgent] Calculated Energy Delta: {energy_delta}")
 
 
-                        if energy_delta < 0:
+                        if energy_delta < 0 and not self.trading:
+
+                            self.trading = True
+
                             # Get the timing variables
                             bidding_start, bidding_end, reveal_end = await self.get_auction_timings()
-                            print(bidding_start)
-                            print(bidding_end)
-                            print(reveal_end)
+
                             await self.current_auction_state(bidding_start, bidding_end, reveal_end)
 
                             # We are in an energy deficit and need to purchase energy
@@ -221,7 +227,12 @@ class NegotiationAgent(Agent):
                             await self.wait_until(bidding_end)
 
                             await self.reveal()
-                        else:
+
+                            self.trading = False
+                        elif not self.trading:
+
+                            self.trading = True
+
                             # We are energy neutral or in a surplus and want to store/sell
                             
                             bidding_start, bidding_end, reveal_end = await self.get_auction_timings()
@@ -248,6 +259,8 @@ class NegotiationAgent(Agent):
                             await self.wait_until(reveal_end)
 
                             await self.close()
+
+                            self.trading = False
                     
                 except Exception as e:
                     print(f"[NegotiationAgent] Error: {e}")
