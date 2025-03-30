@@ -4,7 +4,7 @@ const EnergyVickreyAuction = artifacts.require("EnergyVickreyAuction");
 
 module.exports = async function (deployer) {
     const biddingTime = 20;  // Time in seconds (20 seconds in this case)
-    const revealTime = 10;   // Time in seconds (10 seconds in this case)
+    const revealTime = 20;   // Time in seconds (10 seconds in this case)
     const nextRoundDelay = 2; // Time in seconds for the next auction round delay
 
     deployer.deploy(EnergyVickreyAuction, biddingTime, revealTime).then(async (instance) => {
