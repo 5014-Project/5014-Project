@@ -41,17 +41,28 @@ def start_spade():
         if exit_code is None: print("✅ SPADE server running inline."); return process
         else: print(f"❌ SPADE server exited immediately: {exit_code}"); return None
     except Exception as e: print(f"❌ Error starting SPADE inline: {e}"); return None
-
 def start_streamlit():
     print("🟡 Starting Streamlit UI (inline output)...")
     try:
         streamlit_file = os.path.join(PROJECT_ROOT_DIR, "streamlit_gui.py")
-        process = subprocess.Popen(["streamlit", "run", streamlit_file], shell=True) # Use shell=True for PATH
+
+        # Use a different port (e.g., 8502) to avoid conflicts
+        ps_command = f'Start-Process -NoNewWindow -FilePath "streamlit" -ArgumentList "run", "{streamlit_file}", "--server.port", "8502"'
+
+        process = subprocess.Popen(["powershell", "-Command", ps_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
         time.sleep(2)
         exit_code = process.poll()
-        if exit_code is None: print("✅ Streamlit UI running inline."); return process
-        else: print(f"❌ Streamlit exited immediately: {exit_code}"); return None
-    except Exception as e: print(f"❌ Error starting Streamlit inline: {e}"); return None
+
+        if exit_code is None:
+            print("✅ Streamlit UI running inline on port 8502.")
+            return process
+        else:
+            print(f"❌ Streamlit exited immediately: {exit_code}")
+            return None
+    except Exception as e:
+        print(f"❌ Error starting Streamlit inline: {e}")
+        return None
 
 def start_ganache():
     """Starts Ganache (v7+) in a new PowerShell window, bypassing execution policy AND KEEPS IT OPEN."""
