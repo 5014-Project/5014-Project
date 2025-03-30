@@ -70,7 +70,7 @@ class NegotiationAgent(Agent):
         
         async def wait_until(self, end_datetime):
     
-            end_datetime = datetime.fromtimestamp(end_datetime)
+            end_datetime = datetime.datetime.fromtimestamp(end_datetime)
             
             diff = (end_datetime - datetime.datetime.now()).total_seconds()
             print(f"[NegotiationAgent] Wait time: {diff}")
@@ -151,7 +151,7 @@ class NegotiationAgent(Agent):
                 return -1
             elif current_time < bidding_start:
                 print("[NegotiationAgent] Bidding has not yet started")
-                print(f"[NegotiationAgent] Current Time: {datetime.datetime.fromtimestamp(current_time)}, Bidding Start: {datetime.datetime.fromtimestamp(bidding_start)}")
+                print(f"[NegotiationAgent] Current Time: {datetime.fromtimestamp(current_time)}, Bidding Start: {datetime.datetime.fromtimestamp(bidding_start)}")
                 return 0
             elif current_time <= bidding_end:
                 print("[NegotiationAgent] Currently in the bidding phase")
