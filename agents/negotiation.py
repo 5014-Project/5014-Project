@@ -208,6 +208,10 @@ class NegotiationAgent(Agent):
                             strategy = gui_data.get("strategy")
                             market = demand_response_data.get("market_value")
 
+                            # Wait for an auction to start
+                            while bidding_start == 0:
+                                bidding_start, bidding_end, reveal_end = await self.current_auction_state(bidding_start, bidding_end, reveal_end)
+
                             # Wait for next round of bidding
                             await self.wait_until(bidding_start)
 
@@ -238,7 +242,8 @@ class NegotiationAgent(Agent):
                             bidding_start, bidding_end, reveal_end = await self.get_auction_timings()
                             await self.current_auction_state(bidding_start, bidding_end, reveal_end)
                             
-                            await self.wait_until(reveal_end)
+                            if bidding_start != 0:
+                                await self.wait_until(reveal_end)
 
                             match strategy:
                                 case "aggressive":
