@@ -6,7 +6,7 @@ import json
 import os
 from dotenv import load_dotenv  # pip install python-dotenv
 import asyncio
-from datetime import datetime
+import datetime
 
 # Negotiation Agent: Facilitates peer-to-peer energy trading
 class NegotiationAgent(Agent):
