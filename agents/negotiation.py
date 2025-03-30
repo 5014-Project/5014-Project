@@ -72,10 +72,10 @@ class NegotiationAgent(Agent):
     
             end_datetime = datetime.fromtimestamp(end_datetime)
             
-            diff = (end_datetime - datetime.now()).total_seconds()
+            diff = (end_datetime - datetime.datetime.now()).total_seconds()
             print(f"[NegotiationAgent] Wait time: {diff}")
             while diff > 1:
-                diff = (end_datetime - datetime.now()).total_seconds()
+                diff = (end_datetime - datetime.datetime.now()).total_seconds()
                 await asyncio.sleep(diff/2)
             print("[NegotiationAgent] Wait over...")
             await asyncio.sleep(2)
@@ -143,7 +143,7 @@ class NegotiationAgent(Agent):
                 print(f"[NegotiationAgent] Failed to close auction: {e}")
 
         async def current_auction_state(self, bidding_start, bidding_end, reveal_end):
-            current_time = datetime.now().timestamp()
+            current_time = datetime.datetime.now().timestamp()
 
             
             if bidding_start == 0:
